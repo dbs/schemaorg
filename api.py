@@ -61,7 +61,25 @@ class Unit ():
         return self.typeOf(Unit.GetUnit("rdf:Property"))
 
     def isEnumeration(self):
+        """
+        Check to see if this is an enumeration
+        """
         return self.subClassOf(Unit.GetUnit("Enumeration"))
+
+    def isEnumerationValue(self):
+        """
+        Check to see if this is an enumerated value
+
+        Enumerated values have a type value as their typeOf property, versus
+        regular classes which have 'rdfs:Class'.
+
+        For example:
+        <div typeof="http://schema.org/Boolean" resource="http://schema.org/False">
+        """
+        for triple in self.arcsIn:
+            if triple.arc.id == 'typeOf' and self.id != "rdfs:Class":
+                return True
+        return False
 
     def superceded(self):
         for triple in self.arcsOut:
@@ -197,11 +215,18 @@ class ShowUnit (webapp2.RequestHandler) :
     def GetParentStack(self, node):
         if (node not in self.parentStack):
             self.parentStack.append(node)
+
         if (Unit.isAttribute(node)):
             self.parentStack.append(Unit.GetUnit("Property"))
             self.parentStack.append(Unit.GetUnit("Thing"))
+
+        sc = Unit.GetUnit("rdfs:subClassOf")
+        if GetTargets(sc, node):
+            for p in GetTargets(sc, node):
+                self.GetParentStack(p)
         else:
-            sc = Unit.GetUnit("rdfs:subClassOf")
+            # Enumerations are classes that have no declared subclasses
+            sc = Unit.GetUnit("typeOf")
             for p in GetTargets(sc, node):
                 self.GetParentStack(p)
 
@@ -226,7 +251,9 @@ class ShowUnit (webapp2.RequestHandler) :
             if (nn.id == "Thing" or thing_seen):
                 thing_seen = True
                 self.write(self.ml(nn) )
-                if (ind > 0):
+                if ind == 1 and nn.isEnumerationValue():
+                    self.write(" :: ")
+                elif ind > 0:
                     self.write(" &gt; ")
                 if ind == 1:
                     self.write("<span property=\"rdfs:label\">")
