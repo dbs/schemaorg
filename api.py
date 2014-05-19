@@ -60,6 +60,15 @@ class Unit ():
     def isAttribute(self):
         return self.typeOf(Unit.GetUnit("rdf:Property"))
 
+    def isDataType(self):
+        """
+        Check to see if this is a data type
+
+        DataType and its children do not descend from Thing, so we need to
+        treat it specially.
+        """
+        return self.subClassOf(Unit.GetUnit("DataType"))
+
     def isEnumeration(self):
         """
         Check to see if this is an enumeration
@@ -248,7 +257,7 @@ class ShowUnit (webapp2.RequestHandler) :
         while (ind > 0) :
             ind = ind -1
             nn = self.parentStack[ind]
-            if (nn.id == "Thing" or thing_seen):
+            if (nn.id == "Thing" or thing_seen or nn.isDataType()):
                 thing_seen = True
                 self.write(self.ml(nn) )
                 if ind == 1 and nn.isEnumerationValue():
@@ -262,7 +271,7 @@ class ShowUnit (webapp2.RequestHandler) :
         self.write("</h1>")
         comment = GetComment(node)
         self.write(" <div property=\"rdfs:comment\">%s</div>\n\n" % (comment) + "\n")
-        if (node.isClass()):
+        if (node.isClass() and not node.isDataType()):
             self.write("<table class=\"definition-table\">\n        <thead>\n  <tr><th>Property</th><th>Expected Type</th><th>Description</th>               \n  </tr>\n  </thead>\n\n")
 			#        elif (node.isAttribute()):
 
