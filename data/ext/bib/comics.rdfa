@@ -77,7 +77,7 @@
 
 <div typeof="rdf:Property" resource="http://schema.org/publisherImprint">
   <span class="h" property="rdfs:label">bib:publisherImprint</span>
-  <span class="h" property="rdfs:comment">The publishing division which published the comic.</span>
+  <span class="h" property="rdfs:comment">The publishing division which published the work.</span>
   <span>Domain: <a property="http://schema.org/domainIncludes" href="http://schema.org/CreativeWork">schema:CreativeWork</a></span>
   <span>Range: <a property="http://schema.org/rangeIncludes" href="http://schema.org/Organization">schema:Organization</a></span>
 </div>
